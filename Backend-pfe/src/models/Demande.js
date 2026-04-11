@@ -1,32 +1,98 @@
-import mongoose from 'mongoose';
+// src/models/Demande.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const demandeSchema = new mongoose.Schema({
-  userId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User',
-    required: true 
+const Demande = sequelize.define('Demande', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+    allowNull: false
   },
-  typeDocument: { 
-    type: String, 
-    required: true,
-    enum: ['extrait_naissance', 'carte_sejour', 'certificat_residence', 'contrat_mariage']
+  userId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'users',  // Make sure this matches your User table name
+      key: 'id'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL'
   },
-  nom: { type: String, required: true },
-  prenom: { type: String, required: true },
-  nin: { type: String, required: true },
-  wilayaNaissance: { type: String },
-  commune:         { type: String },
-  dateNaissance:   { type: Date },
-  photoCniPath:     { type: String },
-  photoDomicilePath:{ type: String },
+  typeDocument: {
+    type: DataTypes.ENUM('extrait_naissance', 'carte_sejour', 'certificat_residence', 'contrat_mariage'),
+    allowNull: false
+  },
+  nom: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  prenom: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  nin: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  wilayaNaissance: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  commune: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  dateNaissance: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  photoCniPath: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  photoDomicilePath: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   status: {
-    type: String,
-    enum: ['en_attente', 'en_cours', 'termine', 'refuse'],
-    default: 'en_attente'
+    type: DataTypes.ENUM('en_attente', 'en_cours', 'termine', 'refuse'),
+    defaultValue: 'en_attente',
+    allowNull: false
   },
-  dateDemande:    { type: Date, default: Date.now },
-  dateTraitement: { type: Date },
-  commentaire:    { type: String }
+  dateDemande: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+    allowNull: false
+  },
+  dateTraitement: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  commentaire: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
+}, {
+  tableName: 'demandes',
+  timestamps: true,  // Adds createdAt and updatedAt
+  indexes: [
+    {
+      fields: ['userId']
+    },
+    {
+      fields: ['nin']
+    },
+    {
+      fields: ['status']
+    },
+    {
+      fields: ['typeDocument']
+    },
+    {
+      fields: ['dateDemande']
+    }
+  ]
 });
 
-export default mongoose.model('Demande', demandeSchema);
+export default Demande;

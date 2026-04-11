@@ -36,7 +36,7 @@ const upload = multer({
 // ROUTE: Extrait de Naissance
 router.post('/extrait-naissance', async (req, res) => {
   try {
-    console.log('📥 Nouvelle demande extrait naissance reçue:', req.body);
+    console.log(' Nouvelle demande extrait naissance reçue:', req.body);
 
     const {
       user_id, nom, prenom, nin,
@@ -87,7 +87,7 @@ router.post('/carte-sejour',
   ]),
   async (req, res) => {
     try {
-      console.log('📥 Demande Carte de Séjour reçue');
+      console.log(' Demande Carte de Séjour reçue');
 
       const {
         user_id,

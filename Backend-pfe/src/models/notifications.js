@@ -1,37 +1,52 @@
-import mongoose from 'mongoose';
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const notificationSchema = new mongoose.Schema({
+const Notification = sequelize.define('Notification', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+    allowNull: false
+  },
+  position: {          
+    type: DataTypes.STRING,
+    allowNull: false,
+    comment: 'Position like "acte de nessence", "Fiche de résidence", "acte de mariage"'
+  },
   title: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false
   },
   message: {
-    type: String,
-    required: true
-  },
-  type: {
-    type: String, // e.g., 'appointment', 'document_update', 'system'
-    required: true
-  },
-  employeeId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Employee',
-    required: false // If null, it's a broadcast or relevant to a service
+    type: DataTypes.TEXT,
+    allowNull: false
   },
   service: {
-    type: String,
-    required: false
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Service/department like "état civil", "autorisation de forage"'
   },
   isRead: {
-    type: Boolean,
-    default: false
-  },
-  link: {
-    type: String,
-    required: false
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
-  timestamps: true
+  tableName: 'notifications',
+  timestamps: true,    // Adds createdAt and updatedAt automatically
+  indexes: [
+    {
+      fields: ['position'],  // Index for faster position queries
+      name: 'notifications_position_idx'
+    },
+    {
+      fields: ['service'],
+      name: 'notifications_service_idx'
+    },
+    {
+      fields: ['isRead'],
+      name: 'notifications_isread_idx'
+    }
+  ]
 });
 
-export const Notification = mongoose.model('Notification', notificationSchema);
+export { Notification };

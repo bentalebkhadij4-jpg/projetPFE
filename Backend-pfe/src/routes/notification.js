@@ -1,34 +1,42 @@
 import express from 'express';
+import { Sequelize } from 'sequelize';
 import { Notification } from '../models/notifications.js';
 
 const router = express.Router();
+const { Op } = Sequelize;
 
-// Get notifications for a specific employee
-router.get('/employee/:id', async (req, res) => {
+router.get('/position/:position', async (req, res) => {
   try {
     const service = req.query.service;
+    const employeePosition = req.params.position; // Now using position instead of id
     
-    // Fetch notifications assigned to the employee or to their service
-    const employeeId = req.params.id;
     const query = {
-      $or: [
-        { employeeId: employeeId },
-        { service: service }
+      [Op.or]: [
+        { position: employeePosition },  // position instead of employeeId
+        ...(service ? [{ service: service }] : [])
       ]
     };
 
-    const notifications = await Notification.find(query).sort({ createdAt: -1 }).limit(50);
+    const notifications = await Notification.findAll({
+      where: query,
+      order: [['createdAt', 'DESC']],
+      limit: 50
+    });
+    
     res.json(notifications);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
-
-// Mark a single notification as read
-router.put('/:id/read', async (req, res) => {
+router.put('/:uuid/read', async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
-    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    const notification = await Notification.findOne({
+      where: { id: req.params.uuid }
+    });
+    
+    if (!notification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
 
     notification.isRead = true;
     await notification.save();
@@ -39,34 +47,127 @@ router.put('/:id/read', async (req, res) => {
   }
 });
 
-// Mark all notifications as read for an employee
-router.put('/employee/:id/read-all', async (req, res) => {
+router.put('/position/:position/read-all', async (req, res) => {
   try {
-    const employeeId = req.params.id;
-    const service = req.body.service;
+    const employeePosition = req.params.position; // position instead of id
+    const { service } = req.body;
     
     const query = {
-      $or: [
-        { employeeId: employeeId },
-        { service: service, employeeId: { $ne: null } }
+      [Op.or]: [
+        { position: employeePosition },  // position instead of employeeId
+        ...(service ? [{ service: service }] : [])
       ]
     };
 
-    await Notification.updateMany(query, { isRead: true });
+    await Notification.update(
+      { isRead: true },
+      { where: query }
+    );
+    
     res.json({ message: 'All notifications marked as read' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Post a new notification (usually internal, but endpoint included for testing/admin)
 router.post('/', async (req, res) => {
-  const notification = new Notification(req.body);
   try {
-    const newNotification = await notification.save();
-    res.status(201).json(newNotification);
+    const { position, title, message, service } = req.body; // position instead of employeeId
+    
+    const notification = await Notification.create({
+      position,  // Using position field
+      title,
+      message,
+      service,
+      isRead: false
+    });
+    
+    res.status(201).json(notification);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+router.post('/send-by-position', async (req, res) => {
+  try {
+    const { position, title, message, service } = req.body;
+    
+    let notification = await Notification.findOne({
+      where: { position: position }
+    });
+    
+    if (!notification) {
+      notification = await Notification.create({
+        position,
+        title,
+        message,
+        service,
+        isRead: false
+      });
+      
+      return res.status(201).json({
+        success: true,
+        action: 'created',
+        message: ` Notification created for position: ${position}`,
+        notification: {
+          id: notification.id,
+          position: notification.position,
+          title: notification.title,
+          message: notification.message,
+          service: notification.service
+        }
+      });
+    }
+    notification.title = title;
+    notification.message = message;
+    if (service) notification.service = service;
+    await notification.save();
+    
+    res.status(200).json({
+      success: true,
+      action: 'updated',
+      message: ` Notification sent to position: ${position}`,
+      notification: {
+        id: notification.id,
+        position: notification.position,
+        title: notification.title,
+        message: notification.message,
+        service: notification.service
+      }
+    });
+    
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+router.delete('/position/:position', async (req, res) => {
+  try {
+    const deleted = await Notification.destroy({
+      where: { position: req.params.position }
+    });
+    
+    if (deleted === 0) {
+      return res.status(404).json({ 
+        message: `No notification found at position: ${req.params.position}` 
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: `Notification at position '${req.params.position}' deleted` 
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get('/all', async (req, res) => {
+  try {
+    const notifications = await Notification.findAll({
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 

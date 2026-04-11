@@ -1,14 +1,11 @@
-const mongoose = require('mongoose');
+// src/config/database.js
+import { Sequelize } from 'sequelize';
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+const sequelize = new Sequelize('notification_db', 'postgres', '123', {
+  host: 'localhost',
+  dialect: 'postgresql',
+  port: 5000,
+  logging: false
+});
 
-    console.log(`✅ MongoDB Connected`);
-  } catch (error) {
-    console.error(`❌ Error: ${error.message}`);
-    process.exit(1);
-  }
-};
-
-module.exports = connectDB;
+export default sequelize;

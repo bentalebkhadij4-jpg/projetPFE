@@ -1,36 +1,136 @@
-import mongoose from 'mongoose';
+// src/models/request.js
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/database.js';
 
-const requestSchema = new mongoose.Schema({
+const Request = sequelize.define('Request', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+    allowNull: false
+  },
   citizen: {
-    firstName: String,
-    lastName: String,
-    email: String,
-    nin: String,
-    phone: String,
-    address: String,
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
   },
   citizenId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Citizen'
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'citizens',
+      key: 'id'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL'
   },
-  subject: String,
-  description: String,
-  assignedTo: String,
-  assignedBy: String,
-  assignedEmployeeName: String,
+  subject: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  serviceType: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  assignedTo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Position like fiche_residence, certificat_residence, etc.'
+  },
+  assignedToId: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Employee UUID'
+  },
+  assignedToName: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  assignedToEmail: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  assignedBy: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  assignedById: {
+    type: DataTypes.UUID,
+    allowNull: true
+  },
+  assignedEmployeeName: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  validatedBy: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'Position of validator'
+  },
+  validatedById: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'Employee UUID of validator'
+  },
+  validationDate: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   status: {
-    type: String,
-    enum: ['pending', 'in_progress', 'completed', 'rejected'],
-    default: 'pending'
+    type: DataTypes.ENUM('pending', 'in_progress', 'completed', 'rejected'),
+    defaultValue: 'pending',
+    allowNull: false
   },
   documentStatus: {
-    type: String,
-    enum: ['pending', 'valid', 'missing', 'rejected'],
-    default: 'pending'
+    type: DataTypes.ENUM('pending', 'valid', 'missing', 'rejected'),
+    defaultValue: 'pending',
+    allowNull: false
   },
-  comment: { type: String, default: '' },
-  notificationSent: { type: Boolean, default: false },
-  notificationRead: { type: Boolean, default: false }
-}, { timestamps: true });
+  comment: {
+    type: DataTypes.TEXT,
+    defaultValue: '',
+    allowNull: false
+  },
+  notificationSent: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
+  },
+  notificationRead: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
+  }
+}, {
+  tableName: 'requests',
+  timestamps: true,
+  indexes: [
+    {
+      fields: ['citizenId']
+    },
+    {
+      fields: ['status']
+    },
+    {
+      fields: ['documentStatus']
+    },
+    {
+      fields: ['assignedTo']
+    },
+    {
+      fields: ['assignedToId']
+    },
+    {
+      fields: ['validatedById']
+    },
+    {
+      fields: ['createdAt']
+    }
+  ]
+});
 
-export const Request = mongoose.model('Request', requestSchema);
+export { Request };
