@@ -19,36 +19,24 @@ const Citizen = sequelize.define('Citizen', {
   },
   nin: {
     type: DataTypes.STRING,
-    unique: true,
     allowNull: true,
-    comment: 'National Identification Number'
+    unique: true
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isEmail: true
-    }
+    allowNull: true
   },
   phone: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  address: {
     type: DataTypes.STRING,
     allowNull: true
   }
 }, {
   tableName: 'citizens',
-  timestamps: true,  // Adds createdAt and updatedAt automatically
-  indexes: [
-    {
-      fields: ['nin'],
-      unique: true
-    },
-    {
-      fields: ['email']
-    },
-    {
-      fields: ['phone']
-    }
-  ]
+  timestamps: true
 });
 
 export { Citizen };

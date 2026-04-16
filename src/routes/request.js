@@ -66,10 +66,12 @@ router.post('/submit', async (req, res) => {
       assignedEmployee = employees['fiche_residence'];
     } else if (serviceLower.includes('certificat') || serviceLower.includes('residence')) {
       assignedEmployee = employees['certificat_residence'];
-    } else if (serviceLower.includes('passeport')) {
+    } else if (serviceLower.includes('Acte') || serviceLower.includes('naissance')) {
       assignedEmployee = employees['acte_naissance'];
-    } else if (serviceLower.includes('naissance')) {
+    } else if (serviceLower.includes('certificat') || serviceLower.includes('mariage')) {
       assignedEmployee = employees['certificat_mariage'];
+    }if (serviceLower.includes('Autorisation ') || serviceLower.includes('forage')) {
+      assignedEmployee = employees['Autorisation de forage'];
     }
     
     console.log(`Assigné à: ${assignedEmployee.name} (Position: ${assignedEmployee.position} - Service: ${assignedEmployee.service})`);

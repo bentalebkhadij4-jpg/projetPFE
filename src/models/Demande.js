@@ -20,7 +20,7 @@ const Demande = sequelize.define('Demande', {
     onDelete: 'SET NULL'
   },
   typeDocument: {
-    type: DataTypes.ENUM('extrait_naissance', 'carte_sejour', 'certificat_residence', 'contrat_mariage'),
+    type: DataTypes.ENUM('extrait_naissance', 'Fiche de résidence', 'certificat_residence', 'contrat_mariage'),
     allowNull: false
   },
   nom: {

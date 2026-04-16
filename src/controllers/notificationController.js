@@ -1,5 +1,5 @@
 // src/controllers/notificationController.js
-const Notification = require('../models/Notification');
+const Notification = require('../models/notifications');
 
 // Send notification by position (main function you need)
 const sendNotificationByPosition = async (req, res) => {

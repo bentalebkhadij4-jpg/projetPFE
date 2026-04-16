@@ -1,4 +1,4 @@
-// src/models/employee.js
+// src/models/Employee.js
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
@@ -12,10 +12,7 @@ const Employee = sequelize.define('Employee', {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
-    validate: {
-      isEmail: true
-    }
+    unique: true
   },
   password: {
     type: DataTypes.STRING,
@@ -30,9 +27,8 @@ const Employee = sequelize.define('Employee', {
     allowNull: true
   },
   role: {
-    type: DataTypes.ENUM('admin', 'employee'),
-    defaultValue: 'employee',
-    allowNull: false
+    type: DataTypes.STRING,
+    defaultValue: 'employee'
   },
   service: {
     type: DataTypes.STRING,
@@ -40,8 +36,7 @@ const Employee = sequelize.define('Employee', {
   },
   position: {
     type: DataTypes.STRING,
-    allowNull: true,
-    comment: 'Employee position like "main_gate", "reception", etc.'
+    allowNull: true
   },
   phone: {
     type: DataTypes.STRING,
@@ -52,28 +47,12 @@ const Employee = sequelize.define('Employee', {
     allowNull: true
   },
   status: {
-    type: DataTypes.ENUM('active', 'inactive'),
-    defaultValue: 'active',
-    allowNull: false
+    type: DataTypes.STRING,
+    defaultValue: 'active'
   }
 }, {
   tableName: 'employees',
-  timestamps: true,  // Adds createdAt and updatedAt automatically
-  indexes: [
-    {
-      fields: ['email'],
-      unique: true
-    },
-    {
-      fields: ['position']
-    },
-    {
-      fields: ['service']
-    },
-    {
-      fields: ['role']
-    }
-  ]
+  timestamps: true
 });
 
 export { Employee };
